@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм»
 
 * Студент: [Алексей Виноградов](https://up.htmlacademy.ru/javascript/26/user/1757385).
-* Наставник: `Неизвестно`.
+* Наставник: [Олег Цыганов](https://htmlacademy.ru/profile/olegtsyganov).
 
 ---
 
