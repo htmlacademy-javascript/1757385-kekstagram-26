@@ -1,28 +1,6 @@
 const COMMENT_MAX_LENGTH = 140;
 const DESCRIPTIONS_COUNT = 25;
-
-function getPositiveRandomInt(min, max) {
-  min = min < 0 ? 0 : Math.ceil(min);
-  max = max < 0 ? 0 : Math.floor(max);
-  const lower = Math.min(min, max);
-  const upper = Math.max(min, max);
-
-  if(lower === upper) {
-    return upper;
-  }
-
-  return Math.floor(Math.random() * (upper - lower + 1) + lower);
-}
-
-const checkMaxLength = (checkedString, maxLength) => checkedString.length <= maxLength;
-
-checkMaxLength('Авада Кедавра', COMMENT_MAX_LENGTH); // Stub for linter
-
-const IDS = [];
-const URLS = [];
-for(let i = 0; i < DESCRIPTIONS_COUNT; i++) {
-  IDS[i] = URLS[i] = i + 1;
-}
+const MAX_COMMENT_ID = 10e5;
 
 const DESCRIPTIONS = [
   'Парк в центре города с небольшим прудом',
@@ -34,10 +12,9 @@ const DESCRIPTIONS = [
   'Твой завтрак на время сушки',
   'Там тебя не достанут',
   'Взошла Луна посреди блеклых звёзд',
-  'Гиппопотам не устаит перед твоей непоколебимостью'
+  'Гиппопотам не устоит перед твоей непоколебимостью'
 ];
 
-const UNIQUE_IDS = [];
 const MESSAGES = [
   'Всё отлично!',
   'В целом всё неплохо. Но не всё.',
@@ -60,24 +37,44 @@ const NAMES = [
   'Дима'
 ];
 
-//It possibly unnecessary to generate random numbers in case of Id's and Url's
-function createUniqueNumberFromArray(numbers) {
-  const indexNumber = getPositiveRandomInt(0, numbers.length - 1);
-  const result = numbers[indexNumber];
-  numbers = numbers.splice(indexNumber, 1);
-  return result;
+function UniqueNumbers() {
+  this.currentNumber = 1;
+  this.getNextNumber = function () {
+    return this.currentNumber++;
+  };
 }
 
-//This function can have unpredictable random runtime
-function createUniqueId(numbers) {
-  let result = null;
-  while(!numbers.includes(result)) {
-    result = getPositiveRandomInt(1, 1000);
-    numbers.push(result);
+function UniqueRandomNumbers() {
+  this.numbers = [];
+  this.getNumber = function () {
+    let result = null;
+    while(!this.numbers.includes(result)) {
+      result = getPositiveRandomInt(1, MAX_COMMENT_ID);
+      this.numbers.push(result);
+    }
+
+    return result;
+  };
+}
+
+const ids = new UniqueNumbers();
+const urls = new UniqueNumbers();
+const randomIds = new UniqueRandomNumbers();
+
+function getPositiveRandomInt(min, max) {
+  min = min < 0 ? 0 : Math.ceil(min);
+  max = max < 0 ? 0 : Math.floor(max);
+  const lower = Math.min(min, max);
+  const upper = Math.max(min, max);
+
+  if(lower === upper) {
+    return upper;
   }
 
-  return result;
+  return Math.floor(Math.random() * (upper - lower + 1) + lower);
 }
+
+const checkMaxLength = (checkedString, maxLength) => checkedString.length <= maxLength;
 
 function getRandomValueFromArray(array) {
   return array[getPositiveRandomInt(0, array.length - 1)];
@@ -95,7 +92,7 @@ function createMessage() {
 
 function createComment() {
   return {
-    id: createUniqueId(UNIQUE_IDS),
+    id: randomIds.getNumber(),
     avatar: `img/avatar-${getPositiveRandomInt(1, 6)}.svg`,
     message: createMessage(),
     name: getRandomValueFromArray(NAMES)
@@ -114,8 +111,8 @@ function createRandomComments() {
 
 function createPhotoDescription() {
   return {
-    id: createUniqueNumberFromArray(IDS),
-    url: `photos/${createUniqueNumberFromArray(URLS)}.jpg`,
+    id: ids.getNextNumber(),
+    url: `photos/${urls.getNextNumber()}.jpg`,
     description: getRandomValueFromArray(DESCRIPTIONS),
     likes: getPositiveRandomInt(15, 200),
     comments: createRandomComments()
@@ -123,6 +120,8 @@ function createPhotoDescription() {
 }
 
 let descriptions = Array.from({length: DESCRIPTIONS_COUNT}, createPhotoDescription);
+
+checkMaxLength('Авада Кедавра', COMMENT_MAX_LENGTH); // Stub for linter
 if(descriptions.length < 0) { // Stub for linter
   descriptions = null;
 }
