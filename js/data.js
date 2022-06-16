@@ -37,29 +37,34 @@ const NAMES = [
   'Дима'
 ];
 
-function SimpleCounter() {
-  this.currentNumber = 1;
-  this.getNextNumber = function () {
-    return this.currentNumber++;
+function createNextNumber() {
+  let currentNumber = 1;
+  return function () {
+    return currentNumber++;
   };
 }
 
-function UniqueRandomNumbers() {
-  this.numbers = [];
-  this.getNumber = function () {
-    let result = null;
-    while(!this.numbers.includes(result)) {
-      result = getPositiveRandomInt(1, MAX_COMMENT_ID);
-      this.numbers.push(result);
+function createUniqueRandomNumbers(min, max) {
+  const previousNumbers = [];
+  return function () {
+    if(previousNumbers.length >= (max - min + 1)) {
+      return null;
     }
 
-    return result;
+    let currentNumber = getPositiveRandomInt(min, max);
+    while(previousNumbers.includes(currentNumber)) {
+      currentNumber = getPositiveRandomInt(min, max);
+    }
+
+    previousNumbers.push(currentNumber);
+
+    return currentNumber;
   };
 }
 
-const ids = new SimpleCounter();
-const urls = new SimpleCounter();
-const randomIds = new UniqueRandomNumbers();
+const getNextId = createNextNumber();
+const getNextUrl = createNextNumber();
+const getRandomId = createUniqueRandomNumbers(1, MAX_COMMENT_ID);
 
 function createMessage() {
   const numMessages = getPositiveRandomInt(1, 2);
@@ -73,7 +78,7 @@ function createMessage() {
 
 function createComment() {
   return {
-    id: randomIds.getNumber(),
+    id: getRandomId(),
     avatar: `img/avatar-${getPositiveRandomInt(1, 6)}.svg`,
     message: createMessage(),
     name: getRandomValueFromArray(NAMES)
@@ -92,8 +97,8 @@ function createRandomComments() {
 
 function createPhotoDescription() {
   return {
-    id: ids.getNextNumber(),
-    url: `photos/${urls.getNextNumber()}.jpg`,
+    id: getNextId(),
+    url: `photos/${getNextUrl()}.jpg`,
     description: getRandomValueFromArray(DESCRIPTIONS),
     likes: getPositiveRandomInt(15, 200),
     comments: createRandomComments()
