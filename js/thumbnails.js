@@ -1,31 +1,27 @@
-import { createDescriptions } from './data.js';
-import { DESCRIPTIONS_COUNT } from './setup.js';
-import { showBigPicture } from './gallery.js';
+import { createPhotoesData } from './data.js';
+import { NUMBER_OF_PHOTOES } from './setup.js';
+import { showBigPhotoModal } from './gallery.js';
 
 const pictures = document.querySelector('.pictures');
 
-const otherPictureTemplate = document.querySelector('#picture')
+const photoTemplate = document.querySelector('#picture')
   .content
   .querySelector('.picture');
 
-const otherPicturesData = createDescriptions(DESCRIPTIONS_COUNT);
-const otherPicturesFragment = document.createDocumentFragment();
+const photoesData = createPhotoesData(NUMBER_OF_PHOTOES);
+const photoesFragment = document.createDocumentFragment();
 
-function addPictureHandler(picture, pictureData) {
-  picture.addEventListener('click', (evt) => {
+photoesData.forEach((photoData) => {
+  const photoElement = photoTemplate.cloneNode(true);
+  photoElement.querySelector('.picture__img').src = photoData.url;
+  photoElement.querySelector('.picture__likes').textContent = photoData.likes;
+  photoElement.querySelector('.picture__comments').textContent = photoData.comments.length;
+  photoElement.addEventListener('click', (evt) => {
     evt.preventDefault();
 
-    showBigPicture(pictureData);
+    showBigPhotoModal(photoData);
   });
-}
-
-otherPicturesData.forEach((pictureData) => {
-  const otherPicture = otherPictureTemplate.cloneNode(true);
-  otherPicture.querySelector('.picture__img').src = pictureData.url;
-  otherPicture.querySelector('.picture__likes').textContent = pictureData.likes;
-  otherPicture.querySelector('.picture__comments').textContent = pictureData.comments.length;
-  addPictureHandler(otherPicture, pictureData);
-  otherPicturesFragment.append(otherPicture);
+  photoesFragment.append(photoElement);
 });
 
-pictures.append(otherPicturesFragment);
+pictures.append(photoesFragment);
