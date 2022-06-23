@@ -95,7 +95,7 @@ function createRandomComments() {
   return comments;
 }
 
-function createPhotoDescription() {
+function createPhotoData() {
   return {
     id: getNextId(),
     url: `photos/${getNextUrl()}.jpg`,
@@ -105,6 +105,6 @@ function createPhotoDescription() {
   };
 }
 
-const createDescriptions = (number) => Array.from({length: number}, createPhotoDescription);
+const createPhotoesData = (number) => Array.from({length: number}, createPhotoData);
 
-export { createDescriptions };
+export { createPhotoesData };
