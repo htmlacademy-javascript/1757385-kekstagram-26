@@ -17,4 +17,15 @@ function getRandomValueFromArray(array) {
   return array[getPositiveRandomInt(0, array.length - 1)];
 }
 
-export { getPositiveRandomInt, getRandomValueFromArray, checkMaxLength };
+const isEscapeKey = (evt) => evt.key === 'Escape';
+
+function createEscapeKeydownHandler(cb) {
+  return function (evt) {
+    if(isEscapeKey(evt)) {
+      evt.preventDefault();
+      cb();
+    }
+  };
+}
+
+export { getPositiveRandomInt, getRandomValueFromArray, checkMaxLength, createEscapeKeydownHandler };

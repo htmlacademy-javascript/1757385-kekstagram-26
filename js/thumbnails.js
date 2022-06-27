@@ -2,26 +2,30 @@ import { createPhotoesData } from './data.js';
 import { NUMBER_OF_PHOTOES } from './setup.js';
 import { showBigPhotoModal } from './gallery.js';
 
-const pictures = document.querySelector('.pictures');
+function renderExistingPhotoes() {
+  const pictures = document.querySelector('.pictures');
 
-const photoTemplate = document.querySelector('#picture')
-  .content
-  .querySelector('.picture');
+  const photoTemplate = document.querySelector('#picture')
+    .content
+    .querySelector('.picture');
 
-const photoesData = createPhotoesData(NUMBER_OF_PHOTOES);
-const photoesFragment = document.createDocumentFragment();
+  const photoesData = createPhotoesData(NUMBER_OF_PHOTOES);
+  const photoesFragment = document.createDocumentFragment();
 
-photoesData.forEach((photoData) => {
-  const photoElement = photoTemplate.cloneNode(true);
-  photoElement.querySelector('.picture__img').src = photoData.url;
-  photoElement.querySelector('.picture__likes').textContent = photoData.likes;
-  photoElement.querySelector('.picture__comments').textContent = photoData.comments.length;
-  photoElement.addEventListener('click', (evt) => {
-    evt.preventDefault();
+  photoesData.forEach((photoData) => {
+    const photoElement = photoTemplate.cloneNode(true);
+    photoElement.querySelector('.picture__img').src = photoData.url;
+    photoElement.querySelector('.picture__likes').textContent = photoData.likes;
+    photoElement.querySelector('.picture__comments').textContent = photoData.comments.length;
+    photoElement.addEventListener('click', (evt) => {
+      evt.preventDefault();
 
-    showBigPhotoModal(photoData);
+      showBigPhotoModal(photoData);
+    });
+    photoesFragment.append(photoElement);
   });
-  photoesFragment.append(photoElement);
-});
 
-pictures.append(photoesFragment);
+  pictures.append(photoesFragment);
+}
+
+export { renderExistingPhotoes };
