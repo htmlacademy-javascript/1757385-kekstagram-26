@@ -1,3 +1,5 @@
+import { createEscapeKeydownHandler } from './utils.js';
+
 const bigPictureWindow = document.querySelector('.big-picture');
 const bigPictureImage = bigPictureWindow.querySelector('.big-picture__img').querySelector('img');
 const bigPictureSocial = bigPictureWindow.querySelector('.big-picture__social');
@@ -5,6 +7,8 @@ const likesCount = bigPictureSocial.querySelector('.social__likes').querySelecto
 const commentsCount = bigPictureSocial.querySelector('.comments-count');
 const socialComments = bigPictureSocial.querySelector('.social__comments');
 const socialCaption = bigPictureSocial.querySelector('.social__caption');
+
+bigPictureWindow.querySelector('.big-picture__cancel').addEventListener('click', closeBigPhotoModal);
 
 // Скрываем блоки до следующей домашки (так написано в задании)
 bigPictureSocial.querySelector('.social__comment-count').classList.add('hidden');
@@ -31,13 +35,7 @@ function insertComments(comments) {
   socialComments.append(commentsFragment);
 }
 
-function escapeButtonHandler(evt) {
-  if(evt.key === 'Escape') {
-    closeBigPhotoModal();
-  }
-}
-
-function overlayClickHandler(evt) { //Факультатив )))
+function overlayClickHandler(evt) {
   const target = evt.target;
   if (!target.closest('.big-picture__preview')) {
     closeBigPhotoModal();
@@ -46,15 +44,16 @@ function overlayClickHandler(evt) { //Факультатив )))
 
 bigPictureWindow.addEventListener('click', overlayClickHandler);
 
+const escapeKeydownHandler = createEscapeKeydownHandler(closeBigPhotoModal);
+
 function openBigPhotoModal() {
-  bigPictureWindow.querySelector('.big-picture__cancel').addEventListener('click', closeBigPhotoModal);
-  document.addEventListener('keyup', escapeButtonHandler);
+  document.addEventListener('keydown', escapeKeydownHandler);
   document.body.classList.add('modal-open');
   bigPictureWindow.classList.remove('hidden');
 }
 
 function closeBigPhotoModal() {
-  document.removeEventListener('keyup', escapeButtonHandler);
+  document.removeEventListener('keydown', escapeKeydownHandler);
   bigPictureWindow.classList.add('hidden');
   document.body.classList.remove('modal-open');
 }
