@@ -24,7 +24,7 @@ function CommentsController(loaderButton, outputNode, commentCountNode, commentT
   this.clear = function() {
     comments = [];
     outputNode.innerHTML = '';
-    enableLoaderButton();
+    showLoaderButton();
   };
 
   function insertComments(from = 0, limit = Infinity) {
@@ -49,22 +49,18 @@ function CommentsController(loaderButton, outputNode, commentCountNode, commentT
     commentCountNode.childNodes[0].textContent = `${i} из `;
 
     if(i === comments.length) {
-      disableLoaderButton();
+      hideLoaderButton();
     }
 
     return i;
   }
 
-  function disableLoaderButton () {
-    loaderButton.disabled = true;
-    loaderButton.style.pointerEvents = 'none';
-    loaderButton.style.opacity = '0.2';
+  function hideLoaderButton () {
+    loaderButton.style.display = 'none';
   }
 
-  function enableLoaderButton () {
-    loaderButton.disabled = false;
-    loaderButton.style.pointerEvents = '';
-    loaderButton.style.opacity = '';
+  function showLoaderButton () {
+    loaderButton.style.display = '';
   }
 
   loaderButton.addEventListener('click', () => {
