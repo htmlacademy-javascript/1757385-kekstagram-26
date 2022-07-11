@@ -1,15 +1,12 @@
-import { createPhotoesData } from './data.js';
-import { NUMBER_OF_PHOTOES } from './setup.js';
 import { showBigPhotoModal } from './gallery.js';
 
-function renderExistingPhotoes() {
+function renderExistingPhotoes(photoesData) {
   const pictures = document.querySelector('.pictures');
 
   const photoTemplate = document.querySelector('#picture')
     .content
     .querySelector('.picture');
 
-  const photoesData = createPhotoesData(NUMBER_OF_PHOTOES);
   const photoesFragment = document.createDocumentFragment();
 
   photoesData.forEach((photoData) => {

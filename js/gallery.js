@@ -56,11 +56,11 @@ function CommentsController(loaderButton, outputNode, commentCountNode, commentT
   }
 
   function hideLoaderButton () {
-    loaderButton.style.display = 'none';
+    loaderButton.classList.add('hidden');
   }
 
   function showLoaderButton () {
-    loaderButton.style.display = '';
+    loaderButton.classList.remove('hidden');
   }
 
   loaderButton.addEventListener('click', () => {
