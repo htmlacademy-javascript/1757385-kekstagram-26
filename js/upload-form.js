@@ -1,27 +1,40 @@
 import { createEscapeKeydownHandler, checkMaxLength } from './utils.js';
 import { COMMENT_MAX_LENGTH, HASHTAGS_MAX_NUMBER, IMAGE_SCALE_STEP } from './setup.js';
+import { sendData } from './api.js';
 
 const imageUploadForm = document.querySelector('.img-upload__form');
 const imageUploadInput = imageUploadForm.querySelector('.img-upload__input');
 const imageUploadOverlay = imageUploadForm.querySelector('.img-upload__overlay');
 const imageUploadCancelButton = imageUploadForm.querySelector('.img-upload__cancel');
+const submitButton = imageUploadForm.querySelector('.img-upload__submit');
 const hashtagsInput = imageUploadForm.querySelector('.text__hashtags');
 const textDescriptionElement = imageUploadForm.querySelector('.text__description');
 const scaleImageElement = imageUploadForm.querySelector('.img-upload__scale');
-const scaleValueControl = scaleImageElement.querySelector('.scale__control--value');
+const scaleControlValue = scaleImageElement.querySelector('.scale__control--value');
 const previewImageElement = imageUploadForm.querySelector('.img-upload__preview').querySelector('img');
 const effectsListElement = imageUploadForm.querySelector('.effects__list');
 const effectLevelElement = imageUploadForm.querySelector('.effect-level__slider');
-const effectValueInputElement = imageUploadForm.querySelector('.effect-level__value');
+const effectValueInput = imageUploadForm.querySelector('.effect-level__value');
 
 //Открытие/закрытие формы
-const escapeKeydownHandler = createEscapeKeydownHandler(escapeKeydownCallback);
+const escapeKeydownHandler = createEscapeKeydownHandler(resetImageUploadModal);
 
 textDescriptionElement.addEventListener('keydown', (evt) => evt.stopPropagation());
 hashtagsInput.addEventListener('keydown', (evt) => evt.stopPropagation());
 
-function escapeKeydownCallback() {
-  imageUploadForm.reset();
+hideSlider();
+scaleControlValue.value = '100%';
+
+function resetImageUploadForm() {
+  imageUploadInput.value = '';
+  hashtagsInput.value = '';
+  textDescriptionElement.value = '';
+  resetImageEffect();
+  resetImageScale();
+}
+
+function resetImageUploadModal() {
+  resetImageUploadForm();
   closeImageUploadModal();
 }
 
@@ -29,10 +42,7 @@ function openImageUploadModal() {
   document.addEventListener('keydown', escapeKeydownHandler);
   scaleImageElement.addEventListener('click', scaleChangeHandler);
   effectsListElement.addEventListener('click', effectChangeHandler);
-  hideSlider();
   imageUploadOverlay.classList.remove('hidden');
-  scaleValueControl.value = '100%';
-  previewImageElement.style = '';
   document.body.classList.add('modal-open');
 }
 
@@ -45,7 +55,10 @@ function closeImageUploadModal() {
 }
 
 imageUploadInput.addEventListener('change', openImageUploadModal);
-imageUploadCancelButton.addEventListener('click', closeImageUploadModal);
+imageUploadCancelButton.addEventListener('click', (evt) => {
+  evt.preventDefault();
+  resetImageUploadModal();
+});
 
 // Валидация формы
 const pristine = new Pristine(imageUploadForm, {
@@ -55,9 +68,9 @@ const pristine = new Pristine(imageUploadForm, {
 });
 
 const hashtagErrorCodes = {
-  'wrongFormat': 'Неверный формат хэш-тега',
-  'doubling': 'Дублирование хэш-тегов непозволительно, сэр!',
-  'maxAmount': 'Превышено максимально допустимое количество хэштегов'
+  wrongFormat: 'Неверный формат хэш-тега',
+  doubling: 'Дублирование хэш-тегов непозволительно, сэр!',
+  maxAmount: 'Превышено максимально допустимое количество хэштегов'
 };
 
 let hashtagErrorCode = '0';
@@ -105,19 +118,9 @@ function getCommentLengthErrorMessage() {
 pristine.addValidator(hashtagsInput, validateHashtags, getHashtagsValidationMessage);
 pristine.addValidator(textDescriptionElement, validateCommentLength, getCommentLengthErrorMessage);
 
-//Отправка формы
-imageUploadForm.addEventListener('submit', (evt) => {
-  evt.preventDefault();
-
-  if (pristine.validate()) {
-    closeImageUploadModal();
-    imageUploadForm.submit();
-  }
-});
-
 // Масштабирование изображения
 function updateScaleImage(step) {
-  let scale = parseInt(scaleValueControl.value, 10);
+  let scale = parseInt(scaleControlValue.value, 10);
   scale += step;
 
   //Этот тип проверки на выход из диапазона необходим для шагов масштабирования, не кратных 25
@@ -125,7 +128,7 @@ function updateScaleImage(step) {
   scale = scale < 25 ? 25 : scale;
 
   previewImageElement.style.transform = `scale(${scale}%)`;
-  scaleValueControl.value = `${scale}%`;
+  scaleControlValue.value = `${scale}%`;
 }
 
 function scaleChangeHandler(evt) {
@@ -134,6 +137,11 @@ function scaleChangeHandler(evt) {
   } else if(evt.target.matches('.scale__control--smaller')) {
     updateScaleImage(-IMAGE_SCALE_STEP);
   }
+}
+
+function resetImageScale() {
+  previewImageElement.style.transform = '';
+  scaleControlValue.value = '100%';
 }
 
 // Эффекты на изображении
@@ -233,7 +241,7 @@ noUiSlider.create(effectLevelElement, {
   format: {
     to: function(value) {
       if(currentEffect === 'none') {
-        return 0;
+        return 100;
       }
 
       value = Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1);
@@ -256,7 +264,7 @@ function setEffectValue(effectKey, value) {
     previewImageElement.style.filter = '';
   }
 
-  effectValueInputElement.value = parseFloat(value);
+  effectValueInput.value = parseFloat(value);
 }
 
 function hideSlider() {
@@ -265,4 +273,72 @@ function hideSlider() {
 
 function showSlider() {
   imageUploadForm.querySelector('.img-upload__effect-level').style.display = '';
+}
+
+function resetImageEffect() {
+  previewImageElement.style.filter = '';
+  previewImageElement.classList.remove(`effects__preview--${currentEffect}`);
+  currentEffect = 'none';
+  effectValueInput.value = '100';
+  effectLevelElement.noUiSlider.updateOptions(effects['none'].options);
+  effectsListElement.querySelector('#effect-none').checked = true;
+  hideSlider();
+}
+
+//Отправка формы
+imageUploadForm.addEventListener('submit', (evt) => {
+  evt.preventDefault();
+
+  if (pristine.validate()) {
+    blockSubmitButton();
+    sendData(onSuccessSending, onFailedSending, new FormData(evt.target));
+  }
+});
+
+function blockSubmitButton() {
+  submitButton.disabled = 'true';
+  submitButton.textContent = 'Публикую...';
+}
+
+function unblockSubmitButton() {
+  submitButton.disabled = '';
+  submitButton.textContent = 'Опубликовать';
+}
+
+function onSuccessSending() {
+  unblockSubmitButton();
+  resetImageUploadModal();
+  showSuccessMessage();
+}
+
+function onFailedSending() {
+  unblockSubmitButton();
+  showFailedMessage();
+}
+
+function showFailedMessage() {
+  showMessage(document.querySelector('#error').content.querySelector('.error'));
+}
+
+function showSuccessMessage() {
+  showMessage(document.querySelector('#success').content.querySelector('.success'));
+}
+
+function showMessage(templateElement) {
+  const modalElement = templateElement.cloneNode(true);
+  modalElement.style.zIndex = '100';
+
+  const remove = () => modalElement.remove();
+
+  const modalEscapeKeydownHandler = createEscapeKeydownHandler(remove);
+  document.addEventListener('keydown', modalEscapeKeydownHandler);
+
+  modalElement.querySelector('button').addEventListener('click', remove);
+  document.body.append(modalElement);
+
+  document.body.addEventListener('click', (evt) => {
+    if (evt.target === modalElement) {
+      remove();
+    }
+  });
 }
