@@ -54,8 +54,6 @@ function showAlert(message) {
 
   document.body.append(alertContainer);
 
-  // Эти три вызова setTimeout нужны для анимации, потому что я не знал как сделать,
-  // чтобы это работало из JavaScript по другому
   setTimeout(() => {
     alertContainer.style.transform = 'translate3D(0, 0, 0)';
   }, ALERT_SHOW_DELAY);
@@ -69,4 +67,13 @@ function showAlert(message) {
   }, ALERT_SHOW_TIME + ALERT_SHOW_DELAY + ALERT_HIDE_DELAY);
 }
 
-export { getPositiveRandomInt, getRandomValueFromArray, checkMaxLength, createEscapeKeydownHandler, showAlert };
+function debounce(callback, timeoutDelay) {
+  let timeoutId;
+
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+}
+
+export { getPositiveRandomInt, getRandomValueFromArray, checkMaxLength, createEscapeKeydownHandler, showAlert, debounce };
