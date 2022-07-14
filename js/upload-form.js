@@ -2,13 +2,15 @@ import { createEscapeKeydownHandler, checkMaxLength } from './utils.js';
 import { COMMENT_MAX_LENGTH, HASHTAGS_MAX_NUMBER, IMAGE_SCALE_STEP } from './setup.js';
 import { sendData } from './api.js';
 
+const IMAGE_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+
 const imageUploadForm = document.querySelector('.img-upload__form');
 const imageUploadInput = imageUploadForm.querySelector('.img-upload__input');
 const imageUploadOverlay = imageUploadForm.querySelector('.img-upload__overlay');
 const imageUploadCancelButton = imageUploadForm.querySelector('.img-upload__cancel');
 const submitButton = imageUploadForm.querySelector('.img-upload__submit');
 const hashtagsInput = imageUploadForm.querySelector('.text__hashtags');
-const textDescriptionElement = imageUploadForm.querySelector('.text__description');
+const textDescriptionInput = imageUploadForm.querySelector('.text__description');
 const scaleImageElement = imageUploadForm.querySelector('.img-upload__scale');
 const scaleControlValue = scaleImageElement.querySelector('.scale__control--value');
 const previewImageElement = imageUploadForm.querySelector('.img-upload__preview').querySelector('img');
@@ -17,23 +19,24 @@ const effectLevelElement = imageUploadForm.querySelector('.effect-level__slider'
 const effectValueInput = imageUploadForm.querySelector('.effect-level__value');
 
 //Открытие/закрытие формы
-const escapeKeydownHandler = createEscapeKeydownHandler(resetImageUploadModal);
+const escapeKeydownHandler = createEscapeKeydownHandler(resetAndCloseModal);
 
-textDescriptionElement.addEventListener('keydown', (evt) => evt.stopPropagation());
+textDescriptionInput.addEventListener('keydown', (evt) => evt.stopPropagation());
 hashtagsInput.addEventListener('keydown', (evt) => evt.stopPropagation());
-
-hideSlider();
-scaleControlValue.value = '100%';
 
 function resetImageUploadForm() {
   imageUploadInput.value = '';
   hashtagsInput.value = '';
-  textDescriptionElement.value = '';
+  textDescriptionInput.value = '';
+
+  effectsListElement.querySelectorAll('.effects__preview')
+    .forEach((effectElement) => (effectElement.style.backgroundImage = ''));
+
   resetImageEffect();
   resetImageScale();
 }
 
-function resetImageUploadModal() {
+function resetAndCloseModal() {
   resetImageUploadForm();
   closeImageUploadModal();
 }
@@ -54,10 +57,26 @@ function closeImageUploadModal() {
   document.body.classList.remove('modal-open');
 }
 
-imageUploadInput.addEventListener('change', openImageUploadModal);
+imageUploadInput.addEventListener('change', () => {
+  const file = imageUploadInput.files[0];
+  const fileName = file.name.toLowerCase();
+
+  const matches = IMAGE_FILE_TYPES.some((it) => fileName.endsWith(it));
+
+  if (matches) {
+    const fileUrl = URL.createObjectURL(file);
+    previewImageElement.src = fileUrl;
+
+    effectsListElement.querySelectorAll('.effects__preview')
+      .forEach((effectElement) => (effectElement.style.backgroundImage = `url('${fileUrl}')`));
+
+    openImageUploadModal();
+  }
+});
+
 imageUploadCancelButton.addEventListener('click', (evt) => {
   evt.preventDefault();
-  resetImageUploadModal();
+  resetAndCloseModal();
 });
 
 // Валидация формы
@@ -116,7 +135,7 @@ function getCommentLengthErrorMessage() {
 }
 
 pristine.addValidator(hashtagsInput, validateHashtags, getHashtagsValidationMessage);
-pristine.addValidator(textDescriptionElement, validateCommentLength, getCommentLengthErrorMessage);
+pristine.addValidator(textDescriptionInput, validateCommentLength, getCommentLengthErrorMessage);
 
 // Масштабирование изображения
 function updateScaleImage(step) {
@@ -307,7 +326,7 @@ function unblockSubmitButton() {
 
 function onSuccessSending() {
   unblockSubmitButton();
-  resetImageUploadModal();
+  resetAndCloseModal();
   showSuccessMessage();
 }
 
@@ -342,3 +361,7 @@ function showMessage(templateElement) {
     }
   });
 }
+
+//Сброс масшатаба изображения и эффекта на изображении, указанных в разметке
+resetImageEffect();
+resetImageScale();
