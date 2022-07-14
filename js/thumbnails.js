@@ -1,15 +1,51 @@
 import { showBigPhotoModal } from './gallery.js';
+import { FILTER_TYPE } from './filter.js';
+import { RANDOM_PHOTOES_NUMBER } from './setup.js';
+import { getPositiveRandomInt } from './utils.js';
 
-function renderExistingPhotoes(photoesData) {
-  const pictures = document.querySelector('.pictures');
+const pictures = document.querySelector('.pictures');
 
+function applyFilter(photoes, filter) {
+  switch (filter) {
+    case FILTER_TYPE.RANDOM:
+      return getRandomPhotoes(photoes, RANDOM_PHOTOES_NUMBER);
+    case FILTER_TYPE.DISCUSSED:
+      return sortDiscussedPhotoes(photoes);
+    default:
+      return photoes;
+  }
+}
+
+function getRandomPhotoes(photoes, number) {
+  /*
+  Послание Олегу:
+  Я использовал сортировку для получения рандомного отсортированного массива,
+  так как подумал, что такой алгоритм легче, чем формирование массива из рандомных элементов
+  существующего массива, а затем проверка каждого элемента, есть ли он уже в новом массиве.
+  Можно обсудить
+  */
+  return photoes
+    .slice()
+    .sort((photoOne) => photoOne.id - getPositiveRandomInt(photoOne.id - 5, photoOne.id + 5))
+    .slice(0, number);
+}
+
+function sortDiscussedPhotoes(photoes) {
+  return photoes
+    .slice()
+    .sort((photoOne, photoTwo) => photoTwo.comments.length - photoOne.comments.length);
+}
+
+function renderPhotoes(photoesData, filter = FILTER_TYPE.DEFAULT) {
   const photoTemplate = document.querySelector('#picture')
     .content
     .querySelector('.picture');
 
+  pictures.querySelectorAll('.picture').forEach((picture) => picture.remove());
+
   const photoesFragment = document.createDocumentFragment();
 
-  photoesData.forEach((photoData) => {
+  applyFilter(photoesData, filter).forEach((photoData) => {
     const photoElement = photoTemplate.cloneNode(true);
     photoElement.querySelector('.picture__img').src = photoData.url;
     photoElement.querySelector('.picture__likes').textContent = photoData.likes;
@@ -29,4 +65,4 @@ function renderExistingPhotoes(photoesData) {
   });
 }
 
-export { renderExistingPhotoes };
+export { renderPhotoes };
