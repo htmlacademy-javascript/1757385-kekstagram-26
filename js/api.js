@@ -1,5 +1,10 @@
+const ServerRefs = {
+  GET_DATA_REF: 'https://26.javascript.pages.academy/kekstagram/data',
+  SEND_DATA_REF: 'https://26.javascript.pages.academy/kekstagram'
+};
+
 function getData(onSuccess, onFail) {
-  fetch('https://26.javascript.pages.academy/kekstagram/data')
+  fetch(ServerRefs.GET_DATA_REF)
     .then((response) => {
       if (response.ok) {
         return response.json();
@@ -17,7 +22,7 @@ function getData(onSuccess, onFail) {
 
 function sendData(onSuccess, onFail, body) {
   fetch(
-    'https://26.javascript.pages.academy/kekstagram',
+    ServerRefs.SEND_DATA_REF,
     {
       method: 'POST',
       body
@@ -25,13 +30,10 @@ function sendData(onSuccess, onFail, body) {
   )
     .then((response) => {
       if (response.ok) {
-        return response.json();
+        onSuccess();
+      } else {
+        onFail();
       }
-
-      onFail();
-    })
-    .then(() => {
-      onSuccess();
     })
     .catch(() => {
       onFail();
