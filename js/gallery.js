@@ -4,12 +4,12 @@ import { COMMENT_PARTITION_SIZE } from './setup.js';
 const bigPictureWindow = document.querySelector('.big-picture');
 const bigPictureImage = bigPictureWindow.querySelector('.big-picture__img').querySelector('img');
 const bigPictureSocial = bigPictureWindow.querySelector('.big-picture__social');
-const likesCount = bigPictureSocial.querySelector('.social__likes').querySelector('.likes-count');
-const commentsCount = bigPictureSocial.querySelector('.comments-count');
-const socialComments = bigPictureSocial.querySelector('.social__comments');
-const socialCommentCount = bigPictureSocial.querySelector('.social__comment-count');
-const socialCaption = bigPictureSocial.querySelector('.social__caption');
-const commentsLoader = bigPictureSocial.querySelector('.social__comments-loader');
+const likesCountElement = bigPictureSocial.querySelector('.social__likes').querySelector('.likes-count');
+const totalCommentsNumberElement = bigPictureSocial.querySelector('.comments-count');
+const commentsElement = bigPictureSocial.querySelector('.social__comments');
+const commentCountElement = bigPictureSocial.querySelector('.social__comment-count');
+const socialCaptionElement = bigPictureSocial.querySelector('.social__caption');
+const commentsLoaderButton = bigPictureSocial.querySelector('.social__comments-loader');
 
 function CommentsController(loaderButton, outputNode, commentCountNode, commentTotalNode) {
   let loadedCommentsNumber = 0;
@@ -68,7 +68,7 @@ function CommentsController(loaderButton, outputNode, commentCountNode, commentT
   });
 }
 
-const commentsController = new CommentsController(commentsLoader, socialComments, socialCommentCount, commentsCount);
+const commentsController = new CommentsController(commentsLoaderButton, commentsElement, commentCountElement, totalCommentsNumberElement);
 
 function overlayClickHandler(evt) {
   const target = evt.target;
@@ -96,12 +96,12 @@ function closeBigPhotoModal() {
 
 function showBigPhotoModal(photoData) {
   bigPictureImage.src = photoData.url;
-  likesCount.textContent = photoData.likes;
-  commentsCount.textContent = photoData.comments.length;
+  likesCountElement.textContent = photoData.likes;
+  totalCommentsNumberElement.textContent = photoData.comments.length;
 
   commentsController.clear();
   commentsController.setComments(photoData.comments);
-  socialCaption.textContent = photoData.description;
+  socialCaptionElement.textContent = photoData.description;
 
   openBigPhotoModal();
 }

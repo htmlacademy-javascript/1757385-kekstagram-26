@@ -123,7 +123,8 @@ function validateHashtags(value) {
   }
 
   //Проверка на дубликаты
-  if(hashtags.length !== (new Set(hashtags)).size) {
+  const hashtagsInLowerCase = hashtags.map((hashtag) => (hashtag = hashtag.toLowerCase()));
+  if (hashtags.length !== (new Set(hashtagsInLowerCase).size)) {
     hashtagErrorCode = 'doubling';
     return false;
   }

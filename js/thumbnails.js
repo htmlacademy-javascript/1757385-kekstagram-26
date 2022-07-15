@@ -1,15 +1,15 @@
 import { showBigPhotoModal } from './gallery.js';
-import { FILTER_TYPE } from './filter.js';
+import { FilterType } from './filter.js';
 import { RANDOM_PHOTOES_NUMBER } from './setup.js';
 import { getPositiveRandomInt } from './utils.js';
 
-const pictures = document.querySelector('.pictures');
+const picturesSection = document.querySelector('.pictures');
 
 function applyFilter(photoes, filter) {
   switch (filter) {
-    case FILTER_TYPE.RANDOM:
+    case FilterType.RANDOM:
       return getRandomPhotoes(photoes, RANDOM_PHOTOES_NUMBER);
-    case FILTER_TYPE.DISCUSSED:
+    case FilterType.DISCUSSED:
       return sortDiscussedPhotoes(photoes);
     default:
       return photoes;
@@ -29,12 +29,12 @@ function sortDiscussedPhotoes(photoes) {
     .sort((photoOne, photoTwo) => photoTwo.comments.length - photoOne.comments.length);
 }
 
-function renderPhotoes(photoesData, filter = FILTER_TYPE.DEFAULT) {
+function renderPhotoes(photoesData, filter = FilterType.DEFAULT) {
   const photoTemplate = document.querySelector('#picture')
     .content
     .querySelector('.picture');
 
-  pictures.querySelectorAll('.picture').forEach((picture) => picture.remove());
+  picturesSection.querySelectorAll('.picture').forEach((picture) => picture.remove());
 
   const photoesFragment = document.createDocumentFragment();
 
@@ -47,9 +47,9 @@ function renderPhotoes(photoesData, filter = FILTER_TYPE.DEFAULT) {
     photoesFragment.append(photoElement);
   });
 
-  pictures.append(photoesFragment);
+  picturesSection.append(photoesFragment);
 
-  pictures.addEventListener('click', (evt) => {
+  picturesSection.addEventListener('click', (evt) => {
     const parent = evt.target.closest('.picture');
     if(parent) {
       const linkedData = photoesData.find((photoData) => photoData.id === Number(parent.dataset.photoId));
