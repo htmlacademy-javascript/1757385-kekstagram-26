@@ -17,13 +17,6 @@ function applyFilter(photoes, filter) {
 }
 
 function getRandomPhotoes(photoes, number) {
-  /*
-  Послание Олегу:
-  Я использовал сортировку для получения рандомного отсортированного массива,
-  так как подумал, что такой алгоритм легче, чем формирование массива из рандомных элементов
-  существующего массива, а затем проверка каждого элемента, есть ли он уже в новом массиве.
-  Можно обсудить
-  */
   return photoes
     .slice()
     .sort((photoOne) => photoOne.id - getPositiveRandomInt(photoOne.id - 5, photoOne.id + 5))

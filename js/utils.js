@@ -76,4 +76,4 @@ function debounce(callback, timeoutDelay) {
   };
 }
 
-export { getPositiveRandomInt, getRandomValueFromArray, checkMaxLength, createEscapeKeydownHandler, showAlert, debounce };
+export { getPositiveRandomInt, getRandomValueFromArray, checkMaxLength, createEscapeKeydownHandler, isEscapeKey, showAlert, debounce };
