@@ -1,5 +1,5 @@
 const ACTIVE_BUTTON_CLASS = 'img-filters__button--active';
-const FILTER_TYPE = {
+const FilterType = {
   DEFAULT: 1,
   RANDOM: 2,
   DISCUSSED: 3
@@ -13,7 +13,7 @@ function setFilter(callback) {
     if(evt.target.matches('.img-filters__button')) {
       changeActive(evt.target);
       const newFilterType = evt.target.id.substring(evt.target.id.indexOf('-') + 1).toUpperCase();
-      callback(FILTER_TYPE[newFilterType]);
+      callback(FilterType[newFilterType]);
     }
   });
 }
@@ -28,4 +28,4 @@ function showFilter() {
   document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 }
 
-export { showFilter, setFilter, FILTER_TYPE };
+export { showFilter, setFilter, FilterType };

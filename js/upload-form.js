@@ -1,4 +1,4 @@
-import { createEscapeKeydownHandler, checkMaxLength } from './utils.js';
+import { createEscapeKeydownHandler, isEscapeKey, checkMaxLength } from './utils.js';
 import { COMMENT_MAX_LENGTH, HASHTAGS_MAX_NUMBER, IMAGE_SCALE_STEP } from './setup.js';
 import { sendData } from './api.js';
 
@@ -21,8 +21,17 @@ const effectValueInput = imageUploadForm.querySelector('.effect-level__value');
 //Открытие/закрытие формы
 const escapeKeydownHandler = createEscapeKeydownHandler(resetAndCloseModal);
 
-textDescriptionInput.addEventListener('keydown', (evt) => evt.stopPropagation());
-hashtagsInput.addEventListener('keydown', (evt) => evt.stopPropagation());
+textDescriptionInput.addEventListener('keydown', (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.stopPropagation();
+  }
+});
+
+hashtagsInput.addEventListener('keydown', (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.stopPropagation();
+  }
+});
 
 function resetImageUploadForm() {
   imageUploadInput.value = '';
@@ -114,7 +123,8 @@ function validateHashtags(value) {
   }
 
   //Проверка на дубликаты
-  if(hashtags.length !== (new Set(hashtags)).size) {
+  const hashtagsInLowerCase = hashtags.map((hashtag) => (hashtag = hashtag.toLowerCase()));
+  if (hashtags.length !== (new Set(hashtagsInLowerCase).size)) {
     hashtagErrorCode = 'doubling';
     return false;
   }
